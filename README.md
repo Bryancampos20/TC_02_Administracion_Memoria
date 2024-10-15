@@ -1,7 +1,6 @@
 ## Proyecto de Administración de Memoria
 
-`bash
-   docker Este programa implementa una simulación de administración de memoria dinámica en C, utilizando los algoritmos de asignación `Best-fit`, `First-fit` y `Worst-fit`. Se demuestran los problemas de fragmentación y fuga de memoria, gestionando operaciones de asignación, reasignación y liberación de bloques de memoria en un solo bloque de memoria asignado al inicio.
+Este programa implementa una simulación de administración de memoria dinámica en C, utilizando los algoritmos de asignación `Best-fit`, `First-fit` y `Worst-fit`. Se demuestran los problemas de fragmentación y fuga de memoria, gestionando operaciones de asignación, reasignación y liberación de bloques de memoria en un solo bloque de memoria asignado al inicio.
 
 ## Descripción del Proyecto
 
