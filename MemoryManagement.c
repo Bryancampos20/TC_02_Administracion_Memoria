@@ -75,12 +75,74 @@ int best_fit(size_t size, const char* var_name) {
 }
 
 int first_fit(size_t size, const char* var_name) {
-    printf("Implementar");
+    for (int i = 0; i < MAX_BLOCKS; i++) {
+        if (!memory[i].occupied && memory[i].size >= size) {
+            if (memory[i].size > size) {
+                size_t remaining_size = memory[i].size - size;
+                memory[i].size = size;
+                memory[i].name = (char*)malloc(sizeof(char) * (strlen(var_name) + 1));
+                strcpy(memory[i].name, var_name);
+                memory[i].occupied = 1;
+
+                for (int j = i + 1; j < MAX_BLOCKS; j++) {
+                    if (memory[j].size == 0) {
+                        memory[j].size = remaining_size;
+                        memory[j].name = (char*)malloc(sizeof(char) * 20);
+                        strcpy(memory[j].name, "Free");
+                        memory[j].occupied = 0;
+                        break;
+                    }
+                }
+            } else {
+                memory[i].name = (char*)malloc(sizeof(char) * (strlen(var_name) + 1));
+                strcpy(memory[i].name, var_name);
+                memory[i].occupied = 1;
+            }
+            total_memory_used += size;
+            return 1;
+        }
+    }
     return 0;
 }
 
 int worst_fit(size_t size, const char* var_name) {
-    printf("Implementar");
+    int worst_index = -1;
+    size_t max_size = 0;
+
+    for (int i = 0; i < MAX_BLOCKS; i++) {
+        if (!memory[i].occupied && memory[i].size >= size) {
+            if (memory[i].size > max_size) {
+                max_size = memory[i].size;
+                worst_index = i;
+            }
+        }
+    }
+
+    if (worst_index != -1) {
+        if (memory[worst_index].size > size) {
+            size_t remaining_size = memory[worst_index].size - size;
+            memory[worst_index].size = size;
+            memory[worst_index].name = (char*)malloc(sizeof(char) * (strlen(var_name) + 1));
+            strcpy(memory[worst_index].name, var_name);
+            memory[worst_index].occupied = 1;
+
+            for (int j = worst_index + 1; j < MAX_BLOCKS; j++) {
+                if (memory[j].size == 0) {
+                    memory[j].size = remaining_size;
+                    memory[j].name = (char*)malloc(sizeof(char) * 20);
+                    strcpy(memory[j].name, "Free");
+                    memory[j].occupied = 0;
+                    break;
+                }
+            }
+        } else {
+            memory[worst_index].name = (char*)malloc(sizeof(char) * (strlen(var_name) + 1));
+            strcpy(memory[worst_index].name, var_name);
+            memory[worst_index].occupied = 1;
+        }
+        total_memory_used += size;
+        return 1;
+    }
     return 0;
 }
 
@@ -163,9 +225,17 @@ int main(int argc, char* argv[]) {
                     printf(COLOR_RED "Error: No se pudo asignar %s de tamaño %zu\n" COLOR_RESET, var_name, size);
                 }
             } else if (strcmp(algorithm, "ff") == 0) {
-                first_fit(size, var_name);
+                if (first_fit(size, var_name)) {
+                    printf(COLOR_YELLOW "Asignado: %s de tamaño %zu\n" COLOR_RESET, var_name, size);
+                } else {
+                    printf(COLOR_RED "Error: No se pudo asignar %s de tamaño %zu\n" COLOR_RESET, var_name, size);
+                }
             } else if (strcmp(algorithm, "wf") == 0) {
-                worst_fit(size, var_name);
+                if (worst_fit(size, var_name)) {
+                    printf(COLOR_YELLOW "Asignado: %s de tamaño %zu\n" COLOR_RESET, var_name, size);
+                } else {
+                    printf(COLOR_RED "Error: No se pudo asignar %s de tamaño %zu\n" COLOR_RESET, var_name, size);
+                }
             } else {
                 printf(COLOR_RED "Error: Algoritmo desconocido\n" COLOR_RESET);
             }
