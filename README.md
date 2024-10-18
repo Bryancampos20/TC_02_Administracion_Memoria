@@ -28,7 +28,7 @@ Este proyecto se basa en el curso de Principios de Sistemas Operativos y tiene c
 1. Construye la imagen Docker:
 
    ```
-   build -t memory-management .
+   docker build -t memory-management .
    ```
 
 2. Ejecuta el contenedor especificando el algoritmo de asignación (usando las iniciales `bf` para Best-fit, `ff` para First-fit, y `wf` para Worst-fit) y el nombre del archivo de entrada:

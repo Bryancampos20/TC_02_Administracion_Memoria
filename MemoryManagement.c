@@ -149,20 +149,62 @@ int worst_fit(size_t size, const char* var_name) {
 int realloc_memory(const char* var_name, size_t new_size) {
     for (int i = 0; i < MAX_BLOCKS; i++) {
         if (memory[i].occupied && strcmp(memory[i].name, var_name) == 0) {
-            char* new_name = (char*)realloc(memory[i].name, new_size); 
-            if (new_name) {
-                memory[i].name = new_name; 
-                memory[i].size = new_size; 
-                return 1; 
-            } else {
-                printf(COLOR_RED "Error: No se pudo reasignar memoria para %s a tamaño %zu\n" COLOR_RESET, var_name, new_size);
-                return 0; 
+            if (new_size == memory[i].size) {
+                // Si el tamaño es el mismo, no se necesita reasignación.
+                printf("No se requiere reasignación, el tamaño es el mismo.\n");
+                return 1;
+            } else if (new_size < memory[i].size) {
+                // Si el nuevo tamaño es menor, reducimos el bloque actual
+                size_t remaining_size = memory[i].size - new_size;
+                memory[i].size = new_size;
+
+                // Creamos un nuevo bloque con el tamaño restante
+                for (int j = i + 1; j < MAX_BLOCKS; j++) {
+                    if (memory[j].size == 0) {
+                        memory[j].size = remaining_size;
+                        memory[j].name = (char*)malloc(sizeof(char) * 20);
+                        strcpy(memory[j].name, "Free");
+                        memory[j].occupied = 0;
+                        break;
+                    }
+                }
+                printf("Bloque %s reducido a tamaño %zu bytes.\n", var_name, new_size);
+                total_memory_used -= remaining_size;
+                return 1;
+            } else if (new_size > memory[i].size) {
+                // Si el nuevo tamaño es mayor, intentamos expandir el bloque
+                if (i + 1 < MAX_BLOCKS && !memory[i + 1].occupied && memory[i + 1].size >= (new_size - memory[i].size)) {
+                    // Expansión posible en el siguiente bloque libre
+                    size_t additional_size = new_size - memory[i].size;
+                    memory[i].size = new_size;
+                    memory[i + 1].size -= additional_size;
+
+                    if (memory[i + 1].size == 0) {
+                        memory[i + 1].occupied = 0;
+                        free(memory[i + 1].name);
+                        memory[i + 1].name = NULL;
+                    }
+                    total_memory_used += additional_size;
+                    printf("Bloque %s expandido a tamaño %zu bytes.\n", var_name, new_size);
+                    return 1;
+                } else {
+                    // Si no podemos expandir, liberamos el bloque actual y reasignamos uno nuevo
+                    free_memory(var_name); // Liberamos el bloque actual
+                    if (best_fit(new_size, var_name) || first_fit(new_size, var_name) || worst_fit(new_size, var_name)) {
+                        printf("Bloque %s reasignado a nuevo tamaño %zu bytes.\n", var_name, new_size);
+                        return 1;
+                    } else {
+                        printf(COLOR_RED "Error: No se pudo reasignar %s a tamaño %zu\n" COLOR_RESET, var_name, new_size);
+                        return 0;
+                    }
+                }
             }
         }
-    }   
+    }
     printf(COLOR_RED "Error: No se encontró la variable %s\n" COLOR_RESET, var_name); 
     return 0; 
 }
+
 
 void free_memory(const char* var_name) {
     for (int i = 0; i < MAX_BLOCKS; i++) {
