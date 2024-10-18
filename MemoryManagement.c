@@ -211,15 +211,16 @@ void free_memory(const char* var_name) {
         if (memory[i].occupied && strcmp(memory[i].name, var_name) == 0) {
             total_memory_used -= memory[i].size;
             memory[i].occupied = 0;
-            strcpy(memory[i].name, "Free");
             free(memory[i].name); 
-            memory[i].name = NULL; 
+            memory[i].name = (char*)malloc(sizeof(char) * 20); // Asigna "Free" después de liberar
+            strcpy(memory[i].name, "Free");  // Asegúrate de asignar "Free"
             printf(COLOR_GREEN "Memoria liberada: %s\n" COLOR_RESET, var_name);
             return;
         }
     }
     printf(COLOR_RED "Error: No se encontró la variable %s\n" COLOR_RESET, var_name);
 }
+
 
 void print_memory() {
     printf("◆◆ Estado actual de la memoria:\n");
