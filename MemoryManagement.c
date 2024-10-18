@@ -189,7 +189,7 @@ int realloc_memory(const char* var_name, size_t new_size) {
                     return 1;
                 } else {
                     // Si no podemos expandir, liberamos el bloque actual y reasignamos uno nuevo
-                    free_memory(var_name); // Liberamos el bloque actual
+                    free_memory(var_name);
                     if (best_fit(new_size, var_name) || first_fit(new_size, var_name) || worst_fit(new_size, var_name)) {
                         printf("Bloque %s reasignado a nuevo tamaño %zu bytes.\n", var_name, new_size);
                         return 1;
@@ -212,8 +212,8 @@ void free_memory(const char* var_name) {
             total_memory_used -= memory[i].size;
             memory[i].occupied = 0;
             free(memory[i].name); 
-            memory[i].name = (char*)malloc(sizeof(char) * 20); // Asigna "Free" después de liberar
-            strcpy(memory[i].name, "Free");  // Asegúrate de asignar "Free"
+            memory[i].name = (char*)malloc(sizeof(char) * 20);
+            strcpy(memory[i].name, "Free");
             printf(COLOR_GREEN "Memoria liberada: %s\n" COLOR_RESET, var_name);
             return;
         }
