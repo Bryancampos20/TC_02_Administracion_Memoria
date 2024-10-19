@@ -41,4 +41,4 @@ Este proyecto se basa en el curso de Principios de Sistemas Operativos y tiene c
 
 Para ejecutar el algoritmo Best-fit con el archivo fragmentacion_1.txt:
 
-    docker run memory-management bf fragmentacion_1.txt
+    docker run memory-management bf Examples/fragmentacion_1.txt
