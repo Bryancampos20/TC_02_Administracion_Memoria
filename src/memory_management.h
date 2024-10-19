@@ -30,4 +30,4 @@ int realloc_memory(const char* var_name, size_t new_size);
 void free_memory(const char* var_name);
 void print_memory_status();
 
-#endif // MEMORY_MANAGEMENT_H
+#endif 
