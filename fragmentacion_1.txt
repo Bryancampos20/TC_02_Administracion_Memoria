@@ -1,9 +1,0 @@
-# Simulación de fragmentación con diferentes tamaños
-ALLOC X 120
-ALLOC Y 250
-FREE X
-ALLOC Z 100
-ALLOC W 60
-FREE Y
-ALLOC V 200
-PRINT
