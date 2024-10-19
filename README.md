@@ -34,7 +34,7 @@ Este proyecto se basa en el curso de Principios de Sistemas Operativos y tiene c
 2. Ejecuta el contenedor especificando el algoritmo de asignación (usando las iniciales `bf` para Best-fit, `ff` para First-fit, y `wf` para Worst-fit) y el nombre del archivo de entrada:
 
     ```
-    docker run memory-management [iniciales del algoritmo: bf - ff - wf] [nombre del archivo txt]
+    docker run memory-management [iniciales del algoritmo: bf - ff - wf] Examples/[nombre del archivo txt]
     ```
 
 ## Ejemplo
