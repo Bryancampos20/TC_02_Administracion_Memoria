@@ -6,6 +6,13 @@
 MemoryBlock* memory;  
 size_t total_memory_used = 0;
 
+/*
+Función initialize_memory: Se encarga de inicializar la memoria del programa,
+lo que hace es reservar espacio para los bloques que se usarán en las funciones y los configura como
+libres desde el inicio.
+Esto se hace para tener un mayor control de los bloques asignados y que no hayan errores. 
+Especialmente porque los argoritmos (best-fit, first-fit y worst-fit), necesitan un control adecuado.
+*/
 void initialize_memory() {
     memory = malloc(MAX_BLOCKS * sizeof(MemoryBlock));   
     if (!memory) {
@@ -24,7 +31,7 @@ void initialize_memory() {
 }
 
 /* 
-Algoritmo best-fit: Que consiste en  asignar los bloques de memoria que mejor ajuste tengan.
+Algoritmo best-fit: Este algoritmo consiste en  asignar los bloques de memoria que mejor ajuste tengan.
 Para que sea más eficiente la asignación. 
 */
 int best_fit(size_t size, const char* var_name) {
@@ -45,9 +52,9 @@ int best_fit(size_t size, const char* var_name) {
     }
 
     /*
-    Asignamo memoria si encontramos un bloque adecuado. Y si queda con espacio
+    Asignamos memoria si encontramos un bloque adecuado. Y si queda con espacio
     sobrante, se crea un nuevo bloque con dicho espacio sobrante y se le asigna como 
-    free. Pero si no hay espacio sobrante, solo se asigna normalmente 
+    free. Pero si no hay espacio sobrante, solo se asigna el bloque completo
     */
     if (best_index != -1) {
         if (memory[best_index].size > size) {
@@ -78,7 +85,14 @@ int best_fit(size_t size, const char* var_name) {
     return 0; 
 }
 
+/* 
+Algoritmo first-fit: Asignar el primer bloque libre que tenga suficiente espacio para 
+la variable ingresada.Importante, solo busca hasta encontrar un bloque adecuado sin importar si es 
+el más pequeño o grande disponible.
+*/
 int first_fit(size_t size, const char* var_name) {
+    /* Si sobra espacio después de la asignación, creamos un nuevo bloque con el 
+    espacio restante. */
     for (int i = 0; i < MAX_BLOCKS; i++) {
         if (!memory[i].occupied && memory[i].size >= size) {
             if (memory[i].size > size) {
@@ -97,6 +111,7 @@ int first_fit(size_t size, const char* var_name) {
                     }
                 }
             } else {
+                //Si no sobra espacio, asignamos el bloque completo a la variable.
                 strncpy(memory[i].name, var_name, MAX_NAME_LENGTH - 1);
                 memory[i].name[MAX_NAME_LENGTH - 1] = '\0'; 
                 memory[i].occupied = 1;
@@ -107,11 +122,19 @@ int first_fit(size_t size, const char* var_name) {
     }
     return 0;
 }
-
+/*
+Algoritmo worst-fit: Asigna el bloque más grande disponible que pueda contener la variable.
+*/
 int worst_fit(size_t size, const char* var_name) {
+    //Inicializamos el índice del peor bloque y el tamaño máximo.
     int worst_index = -1;
     size_t max_size = 0;
 
+    /*
+    Buscamos el bloque más grande que pueda almacenar la variable.
+    Cuando encuentra el bloque se hace la asignación y si  queda espacio
+    restante, se crea un nuevo bloque
+    */
     for (int i = 0; i < MAX_BLOCKS; i++) {
         if (!memory[i].occupied && memory[i].size >= size) {
             if (memory[i].size > max_size) {
@@ -136,10 +159,12 @@ int worst_fit(size_t size, const char* var_name) {
                     memory[j].occupied = 0;
                     break;
                 }
-            }
+            }    
         } else {
+            //Si no sobra espacio, asignamos el bloque completo a la variable.
             strncpy(memory[worst_index].name, var_name, MAX_NAME_LENGTH - 1);
             memory[worst_index].name[MAX_NAME_LENGTH - 1] = '\0'; 
+            memory[worst_index].occupied = 1;
         }
         total_memory_used += size;
         return 1;
@@ -147,6 +172,11 @@ int worst_fit(size_t size, const char* var_name) {
     return 0;
 }
 
+/*
+Función realloc_memory: Permite cambiar el tamaño de un bloque ya asignado. Si el nuevo tamaño es menor, 
+se libera el espacio sobrante. Si es mayor, se intenta expandir el bloque 
+adyacente libre. Si no es posible, se libera el bloque actual y se reasigna uno nuevo.
+*/
 int realloc_memory(const char* var_name, size_t new_size) {
     for (int i = 0; i < MAX_BLOCKS; i++) {
         if (memory[i].occupied && strcmp(memory[i].name, var_name) == 0) {
@@ -172,7 +202,7 @@ int realloc_memory(const char* var_name, size_t new_size) {
                 total_memory_used -= remaining_size;
                 return 1;
             } else if (new_size > memory[i].size) {
-                // Si el nuevo tamaño es mayor, intentamos expandir el bloque
+                //Si el nuevo tamaño es mayor, intentamos expandir el bloque
                 if (i + 1 < MAX_BLOCKS && !memory[i + 1].occupied && memory[i + 1].size >= (new_size - memory[i].size)) {
                     // Expansión posible en el siguiente bloque libre
                     size_t additional_size = new_size - memory[i].size;
@@ -187,7 +217,7 @@ int realloc_memory(const char* var_name, size_t new_size) {
                     printf("Bloque %s expandido a tamaño %zu bytes.\n", var_name, new_size);
                     return 1;
                 } else {
-                    // Si no podemos expandir, liberamos el bloque actual y reasignamos uno nuevo
+                    //Si no podemos expandir, liberamos el bloque actual y reasignamos uno nuevo
                     free_memory(var_name);
                     if (best_fit(new_size, var_name) || first_fit(new_size, var_name) || worst_fit(new_size, var_name)) {
                         printf("Bloque %s reasignado a nuevo tamaño %zu bytes.\n", var_name, new_size);
